@@ -1,0 +1,59 @@
+<?php
+use yii\helpers\Html;
+
+$this->title=Yii::t('rms','Grade scale report');
+?>
+<div class="grade-scale-form">
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Grade scale interval configuration</h4>
+      </div>
+      <div class="panel-body">
+        
+      </div>
+    </div>
+   <div class="container-fluid">
+
+       <div class="panel panel-info">
+           <div class="panel-heading">
+               <h4>Grade Scale report</h4>
+           </div>
+           <div class="panel-body">
+               <div class="col-md-12">
+                   <div class="container-fluid" id="gradeFormContainer">
+                       
+                </div>
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+
+<!-- departmentCoursesContainer -->
+<!-- gradeFormContainer -->
+
+<?php
+
+$this->registerJs(
+	"
+
+  window.changeLockStatus = function(option){
+    status = option == 0 ? 'Unlock' : 'Lock';
+    if(confirm('Sure to '+ status +' the grade scale setting?')){
+      $.post('/grade-scale/change-lock-status',{option:option}).done(function(data){
+          if(data == 1){
+            window.location.href = window.location;
+          }else{
+            $('#wt_'+id).html(data);
+          }
+        });
+    }
+  }
+	$.post('/grade-scale/get-report',{}).done(function(data){
+		$('#gradeFormContainer').html(data);
+		})
+	",
+	$this::POS_READY);
+
+?>

@@ -1,0 +1,28 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
+/** @var yii\web\View $this */
+/* @var $model frontend\models\HonorListControl */
+/* @var $form yii\widgets\ActiveForm */
+?>
+
+<div class="honor-list-control-form">
+
+    <?php $form = ActiveForm::begin(); ?>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4"><?= $form->field($model, 'hl_maxSGPA')->textInput() ?></div>
+            <div class="col-md-4"><?= $form->field($model, 'hl_minSGPA')->textInput() ?></div>
+            <div class="col-md-4"><br>
+                <div class="form-group" style="margin-top: 5px;">
+                    <?= Html::submitButton($model->isNewRecord ? Yii::t('rms', 'Create') : Yii::t('rms', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php ActiveForm::end(); ?>
+
+</div>

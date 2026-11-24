@@ -1,0 +1,262 @@
+<?php
+
+use yii\helpers\Html;
+use yii\helpers\ArrayHelper;
+use yii\widgets\ActiveForm;
+use yii\bootstrap\Modal;
+
+use \common\components\CommonControllerFunctions as CCF;
+$cc = CCF::currentTime();
+/** @var yii\web\View $this */
+/* @var $model backend\models\CourseOffering2 */
+/* @var $form yii\widgets\ActiveForm */
+?>
+
+<div class="course-offering2-form">
+
+    <?php $form = ActiveForm::begin(); ?>
+    <hr>
+    <div class="conatiner-fluid" style="padding: 2px; font-size: 10pt;">
+    	<div class="row">
+    		<div class="panel panel-primary">
+    			<div class="panel-heading">
+    				New course Offering form
+    			</div>
+    			<div class="panel-body">
+    				<div class="panel panel-info">
+    					<div class="panel-body">
+    						<div class="col-md-3">
+				    			<?= $form->field($model, 'coff2_acadYear_relId')->textInput([
+				    				'value'=>Yii::$app->params['C']['Y'],
+				    				'readonly'=>true,
+				    				'title'=>'You are offering courses for this Acad. Year'
+				    			]) ?>
+				    		</div>
+
+				    		<div class="col-md-3">
+				    			<?= $form->field($model, 'coff2_sem_relId')->textInput([
+				    				'value'=>\backend\models\Semester::findOne(['id'=>CCF::currentTime()['S']])->semester_name,
+				    				'readonly'=>true,
+				    				'title'=>'You are offering courses for this semester.'
+				    			]) ?>
+				    		</div>
+				    		<div class="col-md-3">
+		    					<?= $form->field($model, 'admission')->dropdownList(
+		                            ArrayHelper::map(\backend\models\Admission::find()->all(), 'id', 'admission_name'),
+		                            [
+		                                'prompt'=>'Select Admission',
+		                                
+		                            ]
+		                        ) ?>
+				    		</div>
+
+				    		<div class="col-md-3">
+				    			<?= $form->field($model, 'program')->dropdownList(
+		                            ArrayHelper::map(\backend\models\Program::find()->all(), 'id', 'program_name'),
+		                            [
+		                                'prompt'=>'Select Program',
+		                                'onChange'=>' $.post( "'.Yii::$app->urlManager->createUrl('program/clslvllists').'",
+                                                {
+                                                    progId:$(this).val()
+                                                }, 
+                                                function( data ) {
+                                                //console.log("Returned: "+data);
+                                              $( "#courseoffering2-clslvl" ).html( data );
+                                            });
+                                            // coffLoad();',
+		                            ]
+		                        ) ?>
+				    		</div>
+    					</div>
+    				</div>
+
+		    		<div class="col-md-3">
+		    			<?= $form->field($model, 'department')->dropdownList(
+                            $model->HoDDept,
+                            [
+                                'prompt'=>'Select Department',
+                                'onChange'=>' 
+	                                $.post( "'.Yii::$app->urlManager->createUrl('specialization/listspec').'",
+	                                    {
+	                                        deptId:$(this).val(),
+	                                        progId:$("#courseoffering2-program").val(),
+	                                        admId:$("#courseoffering2-admission").val()
+	                                    }, 
+	                                    function( data ) {
+	                                    //console.log("Returned: "+data);
+		                                  $( "#courseoffering2-spec").html( data );
+		                                  // Load group here
+		                                  $.post("/w-group-setup/get-group-lists",
+		                                  	{
+		                                  		admId:$("#courseoffering2-admission").val(),
+		                                  		progId:$("#courseoffering2-program").val(),
+		                                  		clslvlId:$("#courseoffering2-clslvl").val(),
+		                                  		deptId:$("#courseoffering2-department").val(),
+		                                  		specId:$("#courseoffering2-spec").val()
+		                                  	},
+		                                  	function(data){
+		                                  		// console.log(data);
+		                                  		$("#courseoffering2-coff2_group_relid").html(data);
+		                                  	});
+		                                });
+	                                // coffLoad();
+	                            ',
+                            ]
+                        ) ?>
+		    		</div>
+
+		    		<div class="col-md-3">
+		    			<?= $form->field($model, 'clslvl')->dropdownList(
+                            ArrayHelper::map(\backend\models\ClassLevel::find()->all(), 'id', 'clslvl_name'),
+                            [
+                                'prompt'=>'Select Class Level',
+                                'onChange'=>'$.post("/w-group-setup/get-group-lists",
+		                                  	{
+		                                  		admId:$("#courseoffering2-admission").val(),
+		                                  		progId:$("#courseoffering2-program").val(),
+		                                  		clslvlId:$("#courseoffering2-clslvl").val(),
+		                                  		deptId:$("#courseoffering2-department").val(),
+		                                  		specId:$("#courseoffering2-spec").val()
+		                                  	},
+		                                  	function(data){
+		                                  		// console.log(data);
+		                                  		$("#courseoffering2-coff2_group_relid").html(data);
+		                                  	});',
+                            ]
+                        )->label('Class Level') ?>
+		    		</div>
+
+		    		<div class="col-md-3">
+		    			<?= $form->field($model, 'spec')->dropdownList(
+                            ArrayHelper::map(\backend\models\Specialization::find()->all(), 'id', 'spec_name'),
+                            [
+                                'prompt'=>'Select Specialization',
+                                'onChange'=>'$.post("/w-group-setup/get-group-lists",
+		                                  	{
+		                                  		admId:$("#courseoffering2-admission").val(),
+		                                  		progId:$("#courseoffering2-program").val(),
+		                                  		clslvlId:$("#courseoffering2-clslvl").val(),
+		                                  		deptId:$("#courseoffering2-department").val(),
+		                                  		specId:$("#courseoffering2-spec").val()
+		                                  	},
+		                                  	function(data){
+		                                  		// console.log(data);
+		                                  		$("#courseoffering2-coff2_group_relid").html(data);
+		                                  	});',
+                                
+                                
+                            ]
+                        )->label('Specialization') ?>
+		    		</div>
+
+		    		<div class="col-md-3">
+		    			<?= $form->field($model, 'coff2_group_relId')->dropDownList([],[
+		    				'prompt'=>'Select Group',
+		    				'onChange'=>'loadCourses()',
+		    			])?>
+		    		</div>
+    			</div>
+    			<div class="panel-footer">
+    				<div class="conatiner">
+    					<button class="btn btn-primary btn-sm" id="loadCoursesbtn">Load Courses</button>
+    					<hr>
+    				</div>
+    				<div class="conatiner">
+    					<div class="row">
+    						<div class="col-md-6 bg-info" id="cocatCourseList">
+    						
+	    					</div>
+
+	    					<div class="col-md-6" id="cocatCourseListOffered">
+	    						
+	    					</div>
+    					</div>
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    </div>
+
+</div>
+
+<!-- loadCourses -->
+<?php
+$this->registerJs(
+	"
+
+	window.offer = function(cocatId,coff2Id,courseId){
+		admId=$('#courseoffering2-admission').val();
+  		progId=$('#courseoffering2-program').val();
+  		clslvlId=$('#courseoffering2-clslvl').val();
+  		deptId=$('#courseoffering2-department').val();
+  		specId=$('#courseoffering2-spec').val();
+  		groupId = $('#courseoffering2-coff2_group_relid').val();
+
+		if(confirm('Are sure to offer this course?')){
+			$.post('/course-offering2-detail/create2',
+			{
+				admId:admId,
+				progId:progId,
+				deptId:deptId,
+				clslvlId:clslvlId,
+				specId:specId,
+				groupId:groupId,
+				cocatId:cocatId,
+				coff2Id:coff2Id,
+				courseId:courseId
+			}).done(function(data){
+				if(data == 1){
+					loadCourses();
+				}else{
+					alert(data);
+				}
+			});
+		}
+	}
+
+
+	$('#loadCoursesbtn').click(function(e){
+		e.preventDefault();
+		loadCourses();
+		});
+
+	window.loadCourses = function(){
+		console.log('Loading courses...');
+		admId=$('#courseoffering2-admission').val();
+  		progId=$('#courseoffering2-program').val();
+  		clslvlId=$('#courseoffering2-clslvl').val();
+  		deptId=$('#courseoffering2-department').val();
+  		specId=$('#courseoffering2-spec').val();
+  		groupId = $('#courseoffering2-coff2_group_relid').val();
+
+  		if(isEmpty(admId) || isEmpty(progId) || isEmpty(deptId) || isEmpty(clslvlId) || isEmpty(groupId)){
+  			alert('Incomplete selection, Fill all required fields');
+  		}else{
+  			// $('#modal').modal('show');
+  			$('#cocatCourseList').html('Loading courses...');
+  			$.post('/course-offering2-detail/get-courses',
+  				{
+  					admId:admId,
+  					progId:progId,
+  					deptId:deptId,
+  					clslvlId:clslvlId,
+  					specId:specId,
+  					groupId:groupId
+  				},
+  				function(data){
+	  				$('#cocatCourseList').html(data);
+  				});
+  		}
+
+
+	}
+	window.isEmpty = function(val){
+		return val == ''|| val == ' '|| val == 'undefined';
+	}
+	",
+	$this::POS_READY);
+
+
+?>
+

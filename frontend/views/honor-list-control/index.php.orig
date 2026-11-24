@@ -1,0 +1,42 @@
+<?php
+
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+/** @var yii\web\View $this */
+/* @var $searchModel frontend\models\HonorListControlSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = Yii::t('rms', 'Honor List Controls');
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="honor-list-control-index">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <p>
+        <?= Html::a(Yii::t('rms', 'Create Honor List Control'), ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+<?php Pjax::begin(); ?>    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+            'hl_maxSGPA',
+            'hl_minSGPA',
+            //'hl_created_by',
+            [
+                'attribute'=>'hl_created_by',
+                'value'=>function($model){
+                    return $model->hlCreatedBy->username;
+                }
+            ],
+            'hl_created_at',
+            // 'hl_updated_at',
+            // 'hl_updated_by',
+
+            ['class' => 'yii\grid\ActionColumn'],
+        ],
+    ]); ?>
+<?php Pjax::end(); ?></div>

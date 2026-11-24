@@ -1,0 +1,8 @@
+vendor
+RMS-DEC_7.sign
+DECRIS_7.sign
+composer.phar
+frontend/web/uploads/passwordResetLog.txt
+common/config/authConfigFile.php
+common/config/params.php
+ALTER TABLES.sql

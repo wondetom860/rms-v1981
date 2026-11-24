@@ -1,0 +1,85 @@
+<?php
+/** @var yii\web\View $this */
+
+$this->title = 'rms - Registrar Information System';
+?>
+<div class="site-index">
+
+    <div class="jumbotron">
+        <h1>Welcome to rms!</h1>
+
+        <p class="lead">Registrar Information System</p>
+
+    </div>
+    <div class="jumbotron">
+        <?php
+        $year = date('Y');
+        $month = date('M');
+        $day = date('d');
+        $hour = date('H');
+        $minute = date('i');
+        $second = date('s');
+        echo 'Year: ' . $year . ''
+        . '<br>Month: ' . $month
+        . '<br> Day:' . $day
+        . '<br>Hour: ' . $hour  //returns real time
+        . '<br> Minute: ' . $minute
+        . '<br> Second: ' . $second
+        . '<br>User Name =>' . Yii::$app->user->identity->username;
+        echo "<hr>";
+
+        function getSemester($month) {
+            $sem = '';
+            $semI = ['Sept', 'Oct', 'Nov', 'Dec', 'Jan'];
+            $semII = ['Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            if (array_search($month, $semII) != FALSE) {
+                $sem = 'II';
+            } else if (array_search($month, $semI) != FALSE) {
+                $sem = 'I';
+            } else {
+                // Out of academic semister
+                //$sem = null;
+                $sem = "<i>'Out of academic semister'</i>";
+            }
+
+            return $sem;
+        }
+
+        function getAcademicYear($month, $year) {
+            $currYr = '';
+            if ($month >= 9) {
+                $currYr = $year . '/' . ($year + 1);
+            } else if ($month < 9) {
+                $currYr = ($year - 1) . '/' . $year;
+            }
+            return $currYr;
+        }
+
+        echo "<br>September is in Semester: " . getSemester("Sept");
+        echo "<br>February is in Semester: " . getSemester("Feb");
+        echo "<br>July is in Semester: " . getSemester("Jul");
+        echo "<br><br>Now you are in Semester: " . getSemester(date('M'));
+        
+        
+        echo "<br>Academic Year: [02-2018] " . getAcademicYear(2, 2018);
+        echo "<br>Academic Year: [05-2018] " . getAcademicYear(5, 2018);
+        echo "<br>Academic Year: [03-2018] " . getAcademicYear(3, 2018);
+        echo "<br>Academic Year: [04-2018] " . getAcademicYear(4, 2018);
+        echo "<br>Academic Year: [09-2018] " . getAcademicYear(9, 2018);
+        echo "<br>Academic Year: [08-2018] " . getAcademicYear(8, 2018);
+        echo "<br>Academic Year: [12-2018] " . getAcademicYear(12, 2018);
+
+        echo "<br><br>Now you are in Academic Year: " . getAcademicYear(date('m'), date('Y'));
+        ?>
+    </div>
+    <div class="panel paner-warning">
+        <div class="panel-heading">
+            User Management
+        </div>
+        <div class="panel-body">
+            <?php print_r(Yii::$app->user->identity->full_name); ?>
+        </div>
+    </div>
+
+</div>
+

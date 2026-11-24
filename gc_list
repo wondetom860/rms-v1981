@@ -1,0 +1,40 @@
+SELECT
+	student.std_regId as REGID,
+    concat(first_name,' ',middle_name) as FULL_NAME,
+    department.dept_name as DEPARTMENT,
+    user.user_type as PROFESSION,
+    program.program_name as PROGRAM,
+    COUNT(CASE WHEN grade_scale.gs_ltr_grade = 'A+' THEN 1 END) AS GR_A_PLUS,
+    COUNT(CASE WHEN grade_scale.gs_ltr_grade = 'A' THEN 1 END) AS GR_A,
+    COUNT(CASE WHEN grade_scale.gs_ltr_grade = 'B+' THEN 1 END) AS GR_B_PLUS,
+    COUNT(CASE WHEN grade_scale.gs_ltr_grade = 'B' THEN 1 END) AS GR_B,
+    count(distinct(srd2_course_relId)) as TOTAL_NUMBER_OF_COURSES_ENROLLED,
+    sum(course_crdthr) as TOTAL_CREDIT_HOUR
+FROM
+	semester_registration_2
+    INNER JOIN semester_registration_2_detail ON semester_registration_2.id=semester_registration_2_detail.srd2_semreg_relId
+    INNER JOIN class_level ON class_level.id=semester_registration_2.semreg_clslvl_relId
+    INNER JOIN student ON student.id=semester_registration_2.semreg_std_relId
+    INNER JOIN user ON user.id=student.std_user_relId
+    INNER JOIN grade_scale ON grade_scale.id=semester_registration_2_detail.srd2_grade_relId
+    INNER JOIN department ON department.id=student.std_dept_relId
+    INNER JOIN course on course.id=semester_registration_2_detail.srd2_course_relId
+    INNER JOIN w_group_setup ON w_group_setup.id=student.std_group_realId
+    INNER JOIN ac_active_programs ON ac_active_programs.id=w_group_setup.gs_active_prog_relId
+    INNER JOIN program ON program.id=student.std_prog_relId
+    INNER JOIN ac_academic_year ON ac_academic_year.id=ac_active_programs.academic_year_relId
+WHERE
+	semester_registration_2.semreg_last_ssn_relId IS NOT NULL AND
+    ac_active_programs.graduate_class=1 AND
+    ac_academic_year.school_year='2024/25' AND
+    ac_academic_year.semester='II'
+GROUP BY
+	semreg_std_relId
+ORDER BY 
+	PROGRAM ASC,
+	GR_A_PLUS DESC,
+    GR_A DESC,
+    GR_B_PLUS DESC,
+    GR_B DESC
+    
+;

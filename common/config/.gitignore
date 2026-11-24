@@ -1,0 +1,6 @@
+codeception-local.php
+main-local.php
+params-local.php
+authConfigFile.php
+test-local.php
+# main.php

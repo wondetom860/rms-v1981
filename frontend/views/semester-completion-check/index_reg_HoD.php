@@ -1,0 +1,275 @@
+
+<?php
+
+use yii\helpers\Html;
+use yii\helpers\ArrayHelper;
+use yii\widgets\ActiveForm;
+use yii\bootstrap\Modal;
+
+/** @var yii\web\View $this */
+/* @var $searchModel backend\models\PaymentReasonSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = Yii::t('decirs', 'Semester Completion Check');
+$this->params['breadcrumbs'][] = $this->title;
+?><br>
+<div class="semester-completion-check-index">
+    <div class="container-fluid">
+        <div class="row" style="font-size: 10pt;">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 style="text-align: center; text-decoration: underline; font-stretch: semi-condensed;">Semester completion check <b>For Registrar / Department Head</b></h4> 
+                    <?php $form = ActiveForm::begin(); ?>
+                    <div class="row" style="background-color: #8D8;">
+                        <div class="col-md-2">
+
+                            <?=
+                            $form->field($model, 'admission')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Admission::find()->all(), 'id', 'admission_name'), [
+                                'prompt' => 'Select admission.',
+                                'required' => TRUE,
+                                'onChange' => 'loadGroup();'
+                            ])->label('Admission')
+                            ?>
+
+                        </div>
+                        <div class="col-md-2">
+                            <?=
+                            $form->field($model, 'program')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Program::find()->all(), 'id', 'program_name'), [
+                                'prompt' => 'Select Program',
+                                'required' => TRUE,
+                                'onChange' => ' 
+                                    $.post( "/program/clslvllists",
+                                        {
+                                            progId:$(this).val()
+                                        }, 
+                                      function( data ) {
+                                         console.log("Returned: "+data);
+                                          $("#studentsemesterstatushistory-sssh_clslvl_relid" ).html( data ).trigger("change");
+                                          loadGroup();     
+                                    }); ',
+                            ])->label('Program')
+                            ?>
+
+                        </div>
+
+                        <div class="col-md-2">
+                            <?php
+                            $dept = [];
+                            if(Yii::$app->user->can('DepartmentHead')){
+                                $instDept = \backend\models\Instructor::find()->where(['inst_user_relId'=>Yii::$app->user->identity->id])->one()->inst_dep_relId;
+                                $dept = \backend\models\Department::find()->where(['id'=>$instDept])->all();
+                            }else{$dept = \backend\models\Department::find()->all();}
+                            ?>
+                            <?=
+                            $form->field($model, 'department')->dropdownList(
+                                    ArrayHelper::map($dept, 'id', 'dept_name'), [
+                                'prompt' => 'Select Department',
+                                'required' => TRUE,
+                                    'onChange'=>' 
+                                        $.post( "/program/clslvllists",
+                                            {
+                                                progId:$(this).val()
+                                            }, 
+                                          function( data ) {
+                                             console.log("Returned: "+data);
+                                              $("#studentsemesterstatushistory-sssh_clslvl_relid" ).html( data ).trigger("change");
+                                              loadGroup();       
+                                        }); ',
+                            ])->label('Department')
+                            ?>
+
+                        </div>
+                        <div class="col-md-2">
+                            <?=
+                            $form->field($model, 'sssh_acadYear_relId')->dropdownList(
+                                    ArrayHelper::map(\backend\models\SchoolYear::find()->all(), 'id', 'sch_year_desc'), [
+                                'prompt' => 'Select Academic Year',
+                                'onChange'=>'loadGroup();',
+                            ])->label('Academic Year')
+                            ?>
+                        </div>
+                        <div class="col-md-2">
+                            <?=
+                            $form->field($model, 'sssh_sem_relId')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Semester::find()->all(), 'id', 'semester_name'), [
+                                'prompt' => 'Select Semester',
+                                'onChange'=>'loadGroup();',
+                            ])->label('Semester')
+                            ?>
+                        </div>
+                        <div class="col-md-2">
+                            <?=
+                            $form->field($model, 'group')->dropdownList(
+                                    [], [
+                                'prompt' => 'Select Group',
+                                'onChange'=>'loadStudentsInGroup();',
+                            ])->label('Group')
+                            ?>
+                        </div>
+                        <div class="col-md-1 pull-right"><br>
+                            <button class="btn btn-primary btn-md" id="loadStudents">Show</button>
+                        </div>
+                    </div>
+                    <?php ActiveForm::end(); ?>
+                </div>
+                <div class="panel-body">
+                    <!-- <div class="col-md-4 col-lg-4 col-sm-4">
+                        <div class="container-fluid" id="StudentListContainer" style="background-color: #dd9">
+                            Waiting...
+                        </div>
+                    </div> -->
+                    <div class="col-md-12 col-lg-12 colsm-12">
+                        <i id="printIcon" style="cursor: pointer; display: none; float: right; color: blue;" title="Print" onclick="printCont('studentSemesterGradeReportContainer')">Print<span class="glyphicon glyphicon-print"></span></i>
+                        <div class="container-fluid table-responsive" id="studentSemesterGradeReportContainer" style="border: 1px dashed black;">
+                            Waiting for your selection...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+
+ Modal::begin([
+    'header'=>'<h4 id="modalHeder">Students\' mark Progress report.</h4>',
+    'id'=>'modal_stdMark',
+    'size'=>'modal-md',
+ ]);
+ echo "<div id='modalContent' class='jumbotron'>Loading student mark...</div>";
+ echo "<div id='modalFooter' class='container-fluid alert-info' style='font-size:9pt'>Loading student mark...</div>";
+ Modal::end();
+
+ ?>
+
+<?php
+$this->registerJs(
+        "
+        window.changeByHoD = function(srd2Id,action,stdId){
+            if(action == 'su'){
+                $('#modal_stdMark').modal('show');
+                $('#modalHeder').parent().css('background-color','#8D5');
+                $('#modalFooter').html('Loading Inforamtion. Scaling Up of student missing mark is another option for continous assessment mark submission completion. Have  a nice time...');
+
+                $('#modalContent').load('/semester-completion-check/load-cont-assess-report',{srdId:srd2Id});
+            }else if(action == 'I' || action == 'F'){
+                if(confirm('Are You sure of changing this grade?')){
+                    $.post(
+                        '/semester-completion-check/change-grade',
+                        {
+                            srd2Id:srd2Id,
+                            action:action,
+                            stdId:stdId
+                        })
+                    .done(function(data){
+                        if(data == 1){
+                            loadStudentsInGroup(gsetId2,studentId2);
+                        }else{
+                            $('#studentSemesterGradeReportContainer').html(data);
+                        }
+                    });
+                }else{
+                    
+                }
+            }
+        }
+
+        window.changeByRegistrar = function(srd2Id,action,stdId){
+            changeByHoD(srd2Id,action,stdId);
+        }
+
+        var gsetId2;
+        var studentId2;
+        window.showGrade = function(gsetId,studentId){
+
+            gsetId2 = gsetId;
+            studentId2 = studentId;
+
+            $('#studentSemesterGradeReportContainer').html('Loading.....');
+            $.post('/student-semester-grade-report/report-table',
+                {
+                    gsetId:gsetId2, 
+                    studentId:studentId2
+
+                    }).done(function(data){
+                        $('#studentSemesterGradeReportContainer').html(data);
+                        $('#printIcon').show();
+
+                });
+        }
+
+        window.printCont = function(el){
+            // console.log(el);
+            $('.non-print').hide();
+            var restorePage = $('body').html();
+            var printContent = $('#studentSemesterGradeReportContainer').html();
+            $('body').html(printContent);
+            window.print();
+            $('body').html(restorePage);
+        }
+
+
+    window.loadGroup = function(){
+      $.post('/w-group-setup/get-group-lists-peryear',
+            {
+              acadYearId:$('#studentsemesterstatushistory-sssh_acadyear_relid').val(),
+              semId:$('#studentsemesterstatushistory-sssh_sem_relid').val(),
+              admId:$('#studentsemesterstatushistory-admission').val(),
+              progId:$('#studentsemesterstatushistory-program').val(),
+              clslvlId:$('#studentsemesterstatushistory-sssh_clslvl_relid').val(),
+              deptId:$('#studentsemesterstatushistory-department').val(),
+              specId:$('#studentsemesterstatushistory-spec').val()
+            }, 
+            function( data ) {
+                $('select#studentsemesterstatushistory-group').html( data ).trigger('change');
+            }); 
+    }
+
+
+        window.loadStudentsInGroup = function(){
+            $('#printIcon').hide();
+            $('#studentSemesterGradeReportContainer').html('Loading students semester completion status of this semester.....');
+            // $('#StudentListContainer').html('Loading Instructors for your selection.');
+
+            // Load students assigned to the group in the selected academic year adn semester.
+
+                  admId = $('#studentsemesterstatushistory-admission').val();
+                  progId = $('#studentsemesterstatushistory-program').val();
+                  clslvlId = $('#studentsemesterstatushistory-sssh_clslvl_relid').val();
+                  deptId = $('#studentsemesterstatushistory-department').val(); 
+                  gsetId = $('#studentsemesterstatushistory-group').val(); 
+
+
+                  acadYearId = $('#studentsemesterstatushistory-sssh_acadyear_relid').val(); 
+                  semId = $('#studentsemesterstatushistory-sssh_sem_relid').val(); 
+                  //requiredStatus = $('#studentsemesterstatushistory-status').val();
+
+             $.post('/semester-completion-check/report',
+                    {
+                        
+                        admId:admId,
+                        progId:progId,
+                        clslvlId:clslvlId,
+                        deptId:deptId,
+                        acadYearId:acadYearId,
+                        semId:semId,
+                        gsetId:gsetId
+
+                    }
+                    ).done(function(data){
+                $('#studentSemesterGradeReportContainer').html(data);
+                $('#printIcon').show();
+             });
+
+
+
+        }
+        $('#loadStudents').click(function(e){
+            e.preventDefault();
+            loadStudentsInGroup();
+        });
+        ", $this::POS_READY);
+?>

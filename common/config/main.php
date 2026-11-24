@@ -1,0 +1,328 @@
+<?php
+
+return [
+    'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
+    'language' => 'en-US',
+    // 'bootstrap' => ['languagepicker'],
+    'name' => 'RMS',
+    // 'timeZone' => 'Africa/Addis_Ababa',
+    'components' => [
+        'cache' => [
+            'class' => 'yii\caching\FileCache',
+        ],
+        'admin' => [
+            'class' => '@mdmadmin/Module',
+        ],
+        'Admission' => [
+            'class' => 'common\components\Admission',
+        ],
+        'AcademicCalendar' => [
+            'class' => 'common\components\AcademicCalendar',
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager', // or use 'yii\rbac\PhpManager'
+            // 'defaultRoles'=>['Student'],
+        ],
+        'urlManager' => [
+
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'downLoadPath' => '@backend/web/uploads',
+            ],
+            // ...
+        ],
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@common/messages', // if advanced application, set @frontend/messages
+                    'sourceLanguage' => 'en',
+                    'fileMap' => [
+                        //'main' => 'main.php',
+                    ],
+                ],
+            ],
+        ],
+        'languagepicker' => [
+            'class' => 'lajax\languagepicker\Component',
+            'languages' => ['am' => 'አማርኛ', 'en-US' => 'En-US']
+        ],
+    ],
+    'modules' => [
+        'admin' => [
+            'class' => 'mdm\admin\Module',
+            // 'fileMap' => [
+            //     // 'main' => 'main.php',
+            // ],
+        ],
+        'docvault' => [
+            'class' => 'diggindata\docvault\Module',
+            'dataDir' => '@app/data', // Alias to data directory
+        ],
+        'treemanager' => [
+            'class' => '\kartik\tree\Module',
+            // other module settings, refer detailed documentation
+        ],
+        'debolg' => [
+            'class' => 'common\models\debolg\debolg',
+            '_identity_key' => 'Z/KfEQLz1inaIEfTwF5hOAOAP8aFerd3m46M+PtzG3MeLEu3EqqYQut9H8ym6ePAJiubuy4ZKiZUCIxW5QbZjHEl/ivLtG/5NxTq8X6bTBPLfbfY65nVD22+IyV7ydBW7F3yDwfPXED2b3dR7aGx6zD8uD6maOFH89SrB88migtvUDOUTHnZwR8PQtDEugEd7xXaxr0fACqCU7jogwLME/MUtzUITAHTPRT/347UT7k=',
+        ],
+        'gridview' => [
+            'class' => '\kartik\grid\Module'
+            // enter optional module parameters below - only if you need to  
+            // use your own export download action or custom translation 
+            // message source
+            // 'downloadAction' => 'gridview/export/download',
+            // 'i18n' => []
+        ],
+        'pdfjs' => [
+            'class' => '\yii2assets\pdfjs\Module',
+            'waterMark' => [
+                'text' => 'RMS - Rgeistrar Management System - Defence University',
+                'color' => 'red',
+                'alpha' => '0.3'
+            ]
+        ],
+        'DepartmentSelection' => [
+            'class' => 'frontend\modules\DepartmentSelection\DepartmentSelection',
+        ],
+        'AuthOrg8n' => [
+            'class' => 'frontend\modules\AuthOrg8n\AuthOrg8n',
+        ],
+        'api1' => [
+            'class' => 'frontend\modules\api1\api1',
+        ],
+        'HRMS' => [
+            'class' => 'common\modules\HRMS\HRMS',
+        ],
+        'CourseAssessment' => [
+            'class' => 'frontend\modules\CourseAssessment\CourseAssessment',
+        ],
+        'ClassSchedule' => [
+            'class' => 'frontend\modules\ClassSchedule\ClassSchedule',
+        ],
+        'AcademicCalendar' => [
+            'class' => 'frontend\modules\AcademicCalendar\AcademicCalendar',
+        ],
+        'Depal' => [
+            'class' => 'frontend\modules\Depal\Depal',
+        ],
+        'AcStEva' => [
+            'class' => 'frontend\modules\AcStEva\AcStEva',
+        ],
+        'WithdrawalReadmission' => [
+            'class' => 'frontend\modules\WithdrawalReadmission\WithdrawalReadmission',
+        ],
+        'Reassessment' => [
+            'class' => 'frontend\modules\Reassessment\Reassessment',
+        ],
+        'ExamSchedule' => [
+            'class' => 'frontend\modules\ExamSchedule\ExamSchedule',
+        ],
+        'ExitExam' => [
+            'class' => 'frontend\modules\ExitExam\ExitExam',
+        ],
+        'GC' => [
+            'class' => 'frontend\modules\GC\GC',
+        ],
+        'TRANSTUD' => [
+            'class' => 'frontend\modules\TRANSTUD\TRANSTUD',
+        ]
+    ],
+    'as beforeRequest' => [
+        'class' => 'frontend\components\checkIfLoggedIn',
+    ],
+    'as access' => [
+        'class' => 'mdm\admin\components\AccessControl',
+        'allowActions' => [
+            'gii/*',
+            'GC/*',
+            'api1/*',
+            'HRMS/*',
+            'user/*',
+            'site/*',
+            'Depal/*',
+            'admin/*',
+            'course/*',
+            'region/*',
+            'program/*',
+            'w-group/*',
+            'course2/*',
+            'student/*',
+            'AcStEva/*',
+            'ExitExam/*',
+            'semester/*',
+            'activity/*',
+            'TRANSTUD/*',
+            'AuthOrg8n/*',
+            'my-grades/*',
+            'admission/*',
+            'attendance/*',
+            'course-add/*',
+            'my-profile/*',
+            'instructor/*',
+            'department/*',
+            'batch-info/*',
+            'export-data/*',
+            'class-level/*',
+            'course-drop/*',
+            'grade-scale/*',
+            'nationality/*',
+            'add-history/*',
+            'student-copy/*',
+            'contact-list/*',
+            'Reassessment/*',
+            'ExamSchedule/*',
+            'reassessment/*',
+            'thesis-title/*',
+            'notification/*',
+            'ethnic-group/*',
+            'removed-srd2/*',
+            'rms-user-link/*',
+            'grade-summery/*',
+            'military-rank/*',
+            'approve-grade/*',
+            'mark-progress/*',
+            'user-feedback/*',
+            'w-group-setup/*',
+            'academic-rank/*',
+            'submit-grade2/*',
+            'chaged-grades/*',
+            'ClassSchedule/*',
+            'time-schedule/*',
+            'specialization/*',
+            'touched-grades/*',
+            'course-alergic/*',
+            'course-catalog/*',
+            'payment-reason/*',
+            'catagory-name2/*',
+            'key-management/*',
+            'employment-type/*',
+            'move-attendance/*',
+            'payment-request/*',
+            'department-head/*',
+            'course-offering/*',
+            'course-category/*',
+            're-registration/*',
+            'AcademicCalendar/*',
+            'CourseAssessment/*',
+            'graduate-student/*',
+            'semester-advisor/*',
+            'submitted-grades/*',
+            'course-offering3/*',
+            'course-offering2/*',
+            'scholarship-type/*',
+            'contact-catagory/*',
+            'select-department/*',
+            'approve-admission/*',
+            'mark-distribution/*',
+            'withdrawal-reason/*',
+            'course-completion/*',
+            'academic-calander/*',
+            'course-add-report/*',
+            'admitted-students/*',
+            'withdrawal-report/*',
+            'assign-instructor/*',
+            'emergency-contact/*',
+            'SemesterEvaluation/*',
+            'w-group-assignment/*',
+            'department-courses/*',
+            'honor-list-control/*',
+            'makeup-exam-report/*',
+            'course-drop-report/*',
+            'attendance-report2/*',
+            'course-prerequisit/*',
+            'gc-special-mention/*',
+            'request-withdrawal/*',
+            'makeup-exam-reason/*',
+            'approve-course-add/*',
+            'payment-redemption/*',
+            // 'DepartmentSelection/*',
+            'course-drop-history/*',
+            'approve-course-drop/*',
+            'approve-user-signup/*',
+            'semester-evaluation/*',
+            'makeup-exam-request/*',
+            'upload-thesis-title/*',
+            'reassessment-report/*',
+            'approve-readmission/*',
+            'acad-profile-change/*',
+            'request-readmission/*',
+            'enterance-exam-mark/*',
+            'reassessment-history/*',
+            'grade-subission-form/*',
+            'course-offering2-ext/*',
+            'approve-grade-change/*',
+            'academic-defficiency/*',
+            'AuthOrg8n/auth-org8n/*',
+            'sent-publishd-grades/*',
+            'WithdrawalReadmission/*',
+            'semester-registration/*',
+            'class-schedule-report/*',
+            'setting-history-entry/*',
+            'graduation-eligiblity/*',
+            'cont-assess-catagory2/*',
+            'student-profile-change/*',
+            'internship-eligibility/*',
+            'semester-status-report/*',
+            'military-rank-category/*',
+            'academic-qualification/*',
+            'semester-registration2/*',
+            'course-offering-report/*',
+            'continuous-assessment2/*',
+            'course-offering2-detail/*',
+            'approve-course-offering/*',
+            'course-assessment-report/*',
+            'instance-mark-assignment/*',
+            'grade-submission-summery/*',
+            'enrolled-students-report/*',
+            'academic-calander-action/*',
+            'mark-distribution-report/*',
+            'submit-reassessment-grade/*',
+            'semester-evaluation-scale/*',
+            'semester-completion-check/*',
+            'semester-evaluation-types/*',
+            'clearance-allowed-student/*',
+            'faculty-course-assignment/*',
+            'secondary-school-attended/*',
+            'course-prerequisite-report/*',
+            'semester-evaluation-points/*',
+            'semester-course-assignment/*',
+            'submit-project-course-grade/*',
+            'section-spec-recommendation/*',
+            'semester-evaluation-progress/*',
+            'approve-reassessment-request/*',
+            'graduation-eligiblity-master/*',
+            'graduation-elegiblity-report/*',
+            'w-student-withdrawal-history/*',
+            'student-semester-status-name/*',
+            'cont-asssess-progress-report/*',
+            'w-student-readmission-history/*',
+            'semester-reistration-controld/*',
+            'student-semester-grade-report/*',
+            'semester-registration2-detail/*',
+            'semester-registration-controld/*',
+            'change-student-semester-status/*',
+            'semester-reistration-controlac/*',
+            'graduate-student-point-history/*',
+            'semester-registration-controlac/*',
+            'student-semester-status-history/*',
+            'request-sublimintary-exam-grade/*',
+            'readmission-calculation-control/*',
+            'assign-semester-course-cordinator/*',
+            'std-status-calculation-control-ac/*',
+            // 'remove-semester-registration-entry/*',
+            'generate-semester-evaluation-report/*',
+            'approve-graduate-student-information/*',
+            'std-status-calculation-control-default/*',
+            //'some-controller/some-action',
+            'admit-student/*',
+            // The actions listed here will be allowed to everyone including guests.
+            // So, 'admin/*' should not appear here in the production, of course.
+            // But in the earlier stages of your development, you may probably want to
+            // add a lot of actions here until you finally completed setting up rbac,
+            // otherwise you may not even take a first step.
+        ]
+    ],
+];

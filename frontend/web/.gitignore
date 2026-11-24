@@ -1,0 +1,9 @@
+/index.php
+/index-test.php
+/uploads/
+/assets/
+/runtime/
+/vendor/
+.env
+.idea/
+.DS_Store

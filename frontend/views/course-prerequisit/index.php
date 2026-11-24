@@ -1,0 +1,252 @@
+<?php
+
+use yii\helpers\Html;
+use yii\helpers\ArrayHelper;
+use yii\grid\GridView;
+use kartik\select2\Select2;
+use yii\widgets\Pjax;
+use yii\widgets\ActiveForm;
+/** @var yii\web\View $this */
+/* @var $searchModel backend\models\CoursePrerequisitSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = Yii::t('decirs', 'Course Prerequisite');
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="course-prerequisit-index">
+
+    <h3><?= Html::encode($this->title) ?></h3>
+    <?php if (Yii::$app->user->can('Admin')) { ?>
+        <div class="col-md-12">
+            <?php $form = ActiveForm::begin(['action' => '/course-prerequisit/create']); ?>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    Create new Course Prerequisit
+                </div>
+                <div class="panel-body" style="background-color: #dd9;">
+                    <div class="row ">
+                        <div class="container-fluid table-responsive">
+                            <div class="col-md-3">
+                                <?= $form->field($model, 'preq_adm_relId')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Admission::find()->all(), 'id', 'admission_name'),
+                                    [
+                                        'prompt' => 'Select Admission.',
+                                        'onChange' => '
+                                    $.post("/program/getprogs",{},function(data){
+                                         $("#courseprerequisit-preq_prog_relid").html(data).trigger("change");
+                                        });
+                                ',
+                                    ]
+                                ) ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?= $form->field($model, 'preq_prog_relId')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Program::find()->all(), 'id', 'program_name'),
+                                    [
+                                        'prompt' => 'Select Program',
+                                        'onChange' => '$.post("/department/getdepts",{},function(data){
+                                         $("#courseprerequisit-preq_dept_relid").html(data).trigger("change");
+                                        });'
+                                    ]
+                                ) ?>
+                            </div>
+
+                            <div class="col-md-3">
+                                <?= $form->field($model, 'preq_dept_relId')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Department::find()->all(), 'id', 'dept_name'),
+                                    [
+                                        'prompt' => 'Select department',
+                                        'onChange' => '
+                                    console.log($(this).val());
+                                    $.post(
+                                        "/specialization/listspec-cp",
+                                        {
+                                            deptId:$(this).val(),
+                                            admId:$("#courseprerequisit-preq_adm_relid").val(),
+                                            progId:$("#courseprerequisit-preq_prog_relid").val(),
+                                            },
+                                        function(data){
+                                            $("#courseprerequisit-preq_spec_relid").html(data).trigger("change");
+                                            // console.log(data);
+                                        }
+                                    );
+                                    ',
+
+                                    ]
+                                ) ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?= $form->field($model, 'preq_spec_relId')->dropdownList(ArrayHelper::map(\backend\models\Specialization::find()->all(), 'id', 'spec_name'), ['prompt' => 'Select Spec.']) ?>
+                            </div>
+                            <div class="col-md-5" style="background-color: #803;color: white;">
+                                <?= $form->field($model, 'preqFilterDept')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Department::find()->all(), 'id', 'dept_name'),
+                                    [
+                                        'prompt' => 'Select department',
+                                        'onChange' => '
+                                // console.log($(this).val());
+                                $.post(
+                                    "/department/getdeptcourses",
+                                    {
+                                        deptId:$(this).val()
+                                        },
+                                    function(data){
+                                        $("#courseprerequisit-preq_main_course_relid").html(data);
+                                        // console.log(data);
+                                    }//
+                                );
+                                ',
+
+                                    ]
+                                )->label('Filter Main Course by Department.') ?>
+                                <?= $form->field($model, 'preq_main_course_relId')->widget(Select2::classname(), [
+                                    'data' => ArrayHelper::map(\backend\models\Course::find()->all(), 'id', 'course_title'),
+                                    'options' => [
+                                        'placeholder' => 'Select Main Course ...',
+                                        'onChange' => ' $.post( "' . Yii::$app->urlManager->createUrl('course/coursetitles') . '",
+                                {
+                                    courseId:$(this).val()
+                                }, 
+                                function( data ) {
+                              // console.log("Returned: "+data);
+                              $( "#courseprerequisit-preq_preq_course_relid" ).html(data).trigger("change");
+                            });
+                           // console.log("Program Change made:");',
+                                    ],
+
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+
+                                    ],
+                                ]);
+                                ?>
+                            </div>
+                            <div class="col-md-5" style="background-color: #8d3;">
+                                <?= $form->field($model, 'preqFilterDept')->dropdownList(
+                                    ArrayHelper::map(\backend\models\Department::find()->all(), 'id', 'dept_name'),
+                                    [
+                                        'prompt' => 'Select department',
+                                        'onChange' => '
+                                    // console.log($(this).val());
+                                    $.post(
+                                        "/department/getdeptcourses",
+                                        {
+                                            deptId:$(this).val()
+                                            },
+                                        function(data){
+                                            $("#courseprerequisit-preq_preq_course_relid").html(data);
+                                            // console.log(data);
+                                        }//
+                                    );
+                                    ',
+
+                                    ]
+                                )->label('Filter prerequisit Course by Department.') ?>
+
+                                <?= $form->field($model, 'preq_preq_course_relId')->widget(Select2::classname(), [
+                                    'data' => ArrayHelper::map(backend\models\Course::find()->all(), 'id', 'course_title'),
+                                    'options' => ['placeholder' => 'Select Prerequisit Course ...'],
+                                    'pluginOptions' => [
+                                        'allowClear' => true
+                                    ],
+                                ]);
+                                ?>
+                            </div>
+                            <div class="col-md-2"><br>
+                                <div class="form-group">
+                                    <?= Html::submitButton($model->isNewRecord ? Yii::t('decirs', 'create') : Yii::t('decirs', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php ActiveForm::end();
+    } ?>
+    <div class="col-md-12">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Course Prerequisit
+            </div>
+            <div class="panel-body table-responsive">
+                <!--  <div class="panel-body container-fluid">   -->
+                <?php Pjax::begin(); ?> <?= GridView::widget([
+                                            'dataProvider' => $dataProvider,
+                                            'filterModel' => $searchModel,
+                                            'columns' => [
+                                                ['class' => 'yii\grid\SerialColumn'],
+                                                [
+                                                    'attribute' => 'preq_adm_relId',
+                                                    'filter' => ArrayHelper::map(\backend\models\Admission::find()->all(), 'id', 'admission_name'),
+                                                    'value' => function ($model) {
+                                                        return is_null($model->preq_adm_relId) ? 'All' : $model->preqAdmRel->admission_name;
+                                                    }
+                                                ],
+                                                [
+                                                    'attribute' => 'preq_prog_relId',
+                                                    'filter' => ArrayHelper::map(\backend\models\Program::find()->all(), 'id', 'program_name'),
+                                                    'value' => function ($model) {
+                                                        return is_null($model->preq_prog_relId) ? 'All' : $model->preqProgRel->program_name;
+                                                    }
+                                                ],
+
+                                                [
+                                                    'attribute' => 'preqMainCourseRel.course_title',
+                                                    'value' => function ($model) {
+                                                        return $model->preqMainCourseRel->course_title . "[{$model->preqMainCourseRel->course_code}]";
+                                                    },
+                                                ],
+                                                [
+                                                    'attribute' => 'preqPreqCourseRel.course_title',
+                                                    'value' => function ($model) {
+                                                        return is_null($model->preq_preq_course_relId) ? 'NONE' : $model->preqPreqCourseRel->course_title . '(' . $model->preqPreqCourseRel->course_code . ')';
+                                                    },
+                                                ],
+
+                                                [
+                                                    'attribute' => 'preq_dept_relId',
+                                                    'value' => function ($model) {
+                                                        return is_null($model->preq_dept_relId) ? 'All' : $model->preqDeptRel->dept_name;
+                                                    },
+                                                    'filter' => ArrayHelper::map(\backend\models\Department::find()->orderBy('dept_name')->all(), 'id', 'dept_name'),
+                                                ],
+                                                [
+                                                    'attribute' => 'preq_spec_relId',
+                                                    'value' => function ($model) {
+                                                        return is_null($model->preq_spec_relId) ? 'All' : $model->preqSpecRel->spec_name;
+                                                    }
+                                                ],
+                                                // 
+                                                // 
+                                                // 'preq_created_by',
+                                                // 'preq_created_at',
+                                                // 'preq_updated_by',
+                                                // 'preq_updated_at',
+                                                // 'remark:ntext',
+
+                                                [
+                                                    'class' => 'yii\grid\ActionColumn',
+                                                    'contentOptions' => [],
+                                                    'header' => 'Actions',
+                                                    'template' => '{view} {update} {delete}',
+                                                    'visibleButtons' => [
+                                                        'view' => function ($model, $key, $index) {
+                                                            return Yii::$app->user->can('Admin');
+                                                        },
+                                                        'update' => function ($model, $key, $index) {
+                                                            return Yii::$app->user->can('Admin');
+                                                        },
+                                                        'delete' => function ($model, $key, $index) {
+                                                            return Yii::$app->user->can('Admin');
+                                                        },
+                                                    ]
+                                                ],
+                                            ],
+                                        ]); ?>
+                <?php Pjax::end(); ?>
+
+            </div>
+        </div>
+    </div>
+</div>
